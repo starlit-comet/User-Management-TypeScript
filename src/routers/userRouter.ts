@@ -6,7 +6,15 @@ const router = Router()
 
 const userController = new UserController();
 
-router.get('/login',userController.getLogin)
-router.get('/register',userController.getRegister)
+router.route('/login')
+    .get(userController.getLogin)
+    .post(userController.postLogin)
+
+router.route('/register')
+    .get(userController.getRegister)
+    .post(userController.postRegister)
+
+router.route('/home')
+    .get(userController.getHome)
 
 export default router
