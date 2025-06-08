@@ -108,8 +108,9 @@
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Search users by name or email...">
     </div>
-
-    <% if (users.length > 0) { %>
+    <div class="row">
+      <div class="col-1"></div>
+      <div class="col-10"><% if (users.length > 0) { %>
       <table id="userTable">
         <thead>
           <tr>
@@ -136,9 +137,13 @@
       </table>
     <% } else { %>
       <div class="no-users">No users found.</div>
-    <% } %>
+    <% } %></div>
+      <div class="col-1"></div>
+    </div>
+    
   </div>
-
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     const searchInput = document.getElementById("searchInput");
     const table = document.getElementById("userTable").getElementsByTagName("tbody")[0];
@@ -159,5 +164,6 @@
       });
     });
   </script>
+
 </body>
 </html>

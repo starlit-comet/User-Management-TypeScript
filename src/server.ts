@@ -1,11 +1,14 @@
 import path from 'path'
 import  express,{Application,Router}  from "express";
 import bodyParser from "body-parser";
-import userRouter from './routers/userRouter'
 import pool from './dbconfig/dbconnector'
+import session from 'express-session';
+
+import userRouter from './routers/userRouter'
+import adminRouter from './routers/adminrouter'
 
 class Server {
-    private  app;
+    private  app:Application;
 
     constructor(){
         this.app = express();
@@ -19,6 +22,15 @@ class Server {
         this.app.set('view engine','ejs')
         this.app.set('views', path.join(process.cwd(), 'src', 'views'));
         this.app.use(express.static(path.join(__dirname,'..','public')))
+        this.app.use(session({
+            secret:'session_secret_key',
+            resave:false,
+            saveUninitialized:false,
+            cookie:{
+                maxAge :1000*60*60,
+                secure:false
+            }
+        }))
     }
     private dbConnect(){
         pool.connect((err,client,done)=>{
@@ -28,6 +40,7 @@ class Server {
     }
     private routerConfig(){
          this.app.use('/user',userRouter)
+         this.app.use('/admin',adminRouter)
     }
     public start = (port:number) =>{
         return new Promise((resolve,reject)=>{

@@ -94,7 +94,7 @@
   </style>
 </head>
 <body>
-  <form class="login-box" action="/admin/login" method="POST">
+  <form class="login-box" id="loginform">
     <h2>Admin Login</h2>
 
     <div class="input-group">
@@ -109,5 +109,53 @@
 
     <button type="submit" class="btn-login">Login</button>
   </form>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <script>
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    try {
+      const response = await fetch('/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const result = await response.json();
+      console.log(result)
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful',
+          text: 'Redirecting to Dashboard'
+        }).then(() => {
+          window.location.href = '/admin/dashboard'; // ✅ fixed typo
+        });
+      } else {
+        // ❌ Server returned error status (e.g. 401, 403, 500)
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: result.message || 'Invalid email or password'
+        });
+      }
+
+    } catch (error) {
+      // ❌ Network/server error
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Unable to connect to the server'
+      });
+      console.error('Login Error:', error);
+    }
+  });
+</script>
+
 </body>
 </html>

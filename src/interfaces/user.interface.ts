@@ -2,6 +2,11 @@ export interface LoginRequestBody {
   email: string;
   password: string;
 }
+
+export interface Users{
+  name:string,
+  email:string,
+}
  
 enum Role {
     Admin = 'Admin',

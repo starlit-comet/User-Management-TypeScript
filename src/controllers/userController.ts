@@ -5,6 +5,14 @@ import { HttpMessages } from '../constants/statusMessages';
 import { LoginRequestBody , RegisterRequestBody } from '../interfaces/user.interface';
 import bcrypt from 'bcrypt'
 import { hash } from 'crypto';
+import session from 'express-session'
+
+const isPasswordValid = async(
+                    plainPassword:string,
+                    hashedPassword:string,
+                ):Promise<boolean> =>{
+                    return await bcrypt.compare(plainPassword,hashedPassword)
+                }
 
 
 class UserController {
@@ -16,18 +24,33 @@ class UserController {
             res.status(HttpStatusCode.BAD_REQUEST).send(error)
         }
     }
-    public async postLogin(req:Request,res:Response){
+    public async postLogin<T>(req:Request,res:Response):Promise<T>{
         try {
             const {email ,password}:LoginRequestBody  = req.body
             console.log('login details',email,password)
             const client = await pool.connect()
-            const sql = `SELECT * FROM users WHERE email='${email}' AND password='${password}'`
+            const sql = `SELECT * FROM users WHERE email='${email}'`
             const {rows} = await client.query(sql)
             client.release()
-            if(rows.length===1){
-
+            if(rows.length===0){
+                res.status(HttpStatusCode.NOT_FOUND).json({message:'User Not Found',success:false,ok:false})
+                
             }
             console.log('rows',rows)
+            const user = rows[0]
+            const isPasswordMatch = await isPasswordValid(password,rows[0].password)
+            if(isPasswordMatch){
+                res.status(HttpStatusCode.OK).json({message:'Login succesful',ok:true,success:true})
+                req.session.user={
+                    id:user.id,
+                    name:user.name,
+                    email:user.email,
+                    role:user.role
+                }
+            }else{
+                res.status(HttpStatusCode.BAD_REQUEST).json({message:'Invalid credentials',success:false,ok:false})
+            }
+            return
         } catch (error) {
             console.log(error)
             res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).send(error)
@@ -80,10 +103,15 @@ class UserController {
 
     public async getHome(req:Request,res:Response){
         try {
-             res.render('user/home.ejs',{ user: {
-    name: 'Akshai',
-    email: 'akshai@example.com'
-  }})
+            console.log('session data',req.session.user)
+            if(req.session.user){
+                const user = req.session.user
+                res.status(HttpStatusCode.OK).render('user/home.ejs',{user})
+            }
+            else{
+                res.status(HttpStatusCode.UNAUTHORIZED).redirect('/user/login')
+            }
+            
         } catch (error) {
             
         }

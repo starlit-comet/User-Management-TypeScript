@@ -6,7 +6,9 @@
  "moduleResolution": "node",
  "sourceMap": true,
  "outDir": "dist/src",
- 
+ "typeRoots": ["./node_modules/@types",
+        "./types"
+]
  },
  "lib": ["es2015"]
 }

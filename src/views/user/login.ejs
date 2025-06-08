@@ -48,7 +48,7 @@
       <div class="alert alert-danger"><%= error %></div>
     <% } %>
 
-    <form action="/user/login" method="POST">
+    <form id="loginForm">
       <div class="mb-3">
         <label for="email" class="form-label">Email</label>
         <input type="email" name="email" id="email" class="form-control" placeholder="Enter email" required />
@@ -63,5 +63,52 @@
       Don't have an account? <a href="/user/register">Register</a>
     </p>
   </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+    e.preventDefault(); 
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    try {
+      const response = await fetch('/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const result = await response.json();
+      console.log(result); // ✅ debug output
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Successful',
+          text: 'Redirecting to Home Page'
+        }).then(() => {
+          window.location.href = '/user/home';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: result.message || 'Invalid credentials'
+        });
+      }
+
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Network Error',
+        text: 'Unable to reach the server'
+      });
+    }
+  });
+</script>
+
+  
 </body>
 </html>
